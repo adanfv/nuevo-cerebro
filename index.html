@@ -1,642 +1,581 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <meta name="theme-color" content="#4a7a50"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-  <title>Nuevo Cerebro — Adán Federico</title>
-  <link rel="manifest" href="manifest.json"/>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8f0e8; color: #1a2e1c; }
-    #root { max-width: 480px; margin: 0 auto; min-height: 100vh; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#4a7a50"/>
+<title>Nuevo Cerebro — Adán Federico</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#e8f0e8;color:#1a2e1c;min-height:100vh}
+#app{max-width:480px;margin:0 auto;padding:1rem}
+.card{background:rgba(255,255,255,0.7);border:1px solid rgba(74,122,80,0.25);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.btn{padding:8px 16px;border-radius:20px;border:none;cursor:pointer;font-weight:700;font-size:12px;transition:all .2s}
+.btn-primary{background:#4a7a50;color:#fff}
+.btn-secondary{background:rgba(255,255,255,0.5);color:#5a7a5e;border:1px solid rgba(74,122,80,0.25)}
+.tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.sec-header{background:#4a7a50;color:#fff;padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sec-header span{font-size:13px;font-weight:700}
+.sec-body-a{background:#ccdece}
+.sec-body-b{background:#a8c8aa}
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(74,122,80,0.18);cursor:pointer}
+.check-box{width:19px;height:19px;border-radius:4px;border:2px solid rgba(74,122,80,0.35);background:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.check-box.done{background:#4a7a50;border-color:#4a7a50}
+.check-text{font-size:13px;font-weight:500}
+.check-text.done{color:rgba(42,90,50,0.4);text-decoration:line-through}
+.check-hora{font-size:9px;color:#2d5a32;opacity:.7;font-weight:600}
+.progress-bar{background:rgba(74,122,80,0.15);border-radius:6px;height:8px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:6px;background:#4a7a50;transition:width .5s}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.index-box{background:rgba(255,255,255,0.7);border:1px solid rgba(74,122,80,0.25);border-radius:12px;padding:6px 12px;text-align:right}
+.esfera-btn{padding:5px 10px;border-radius:16px;font-size:10px;cursor:pointer;font-weight:400;background:rgba(255,255,255,0.5);border:1px solid rgba(74,122,80,0.25);color:#5a7a5e;margin:3px}
+.esfera-btn.active{background:#4a7a50;color:#fff;font-weight:700}
+.item-row{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border-bottom:1px solid rgba(74,122,80,0.15)}
+.prio-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.deuda-bar{background:rgba(74,122,80,0.15);border-radius:4px;height:5px;margin:8px 0}
+.deuda-fill{height:100%;border-radius:4px;background:#4a7a50}
+input,select{font-size:12px;padding:6px 9px;border-radius:8px;border:1px solid rgba(74,122,80,0.3);background:rgba(255,255,255,0.7);color:#1a2e1c;outline:none;width:100%}
+.chat-msg{max-width:82%;padding:9px 13px;border-radius:12px;font-size:12px;line-height:1.6;margin-bottom:8px}
+.chat-user{background:#4a7a50;color:#fff;margin-left:auto}
+.chat-bot{background:rgba(255,255,255,0.7);border:1px solid rgba(74,122,80,0.25)}
+.semana-card{background:rgba(255,255,255,0.7);border:1px solid rgba(74,122,80,0.25);border-radius:14px;padding:14px;margin-bottom:12px}
+.dia-circle{width:28px;height:28px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700}
+</style>
 </head>
 <body>
-  <div id="root"></div>
+<div id="app"><div style="padding:2rem;text-align:center;color:#4a7a50">Cargando...</div></div>
+<script>
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+const LS={
+  get:k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const K={main:"ncb-main",checks:"ncb-ck",rel:"ncb-rl"};
 
-  <!-- React + Babel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const hoyISO=()=>new Date().toISOString().split("T")[0];
+const diasemana=()=>{const d=new Date().getDay();return d===0?6:d-1};
+const esVacac=()=>{const h=new Date(),m=h.getMonth()+1,d=h.getDate();return(m===6&&d>=26)||m===7||(m===8&&d<=20)};
+const EXCLUIR=["mananas","familia"];
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
-    const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } = Recharts;
+const SECCIONES=[
+  {id:"mananas",label:"🌅 Mañanas Milagrosas",items:[
+    {id:"m1",t:"4:40 am — Despertar",h:"4:40"},{id:"m2",t:"4:45 — Silencio 5 min",h:"4:45"},
+    {id:"m3",t:"4:50 — Visualización 5 min",h:"4:50"},{id:"m4",t:"5:00 — Ejercicio 30 min",h:"5:00"},
+    {id:"m5",t:"5:30 — Lectura 20 min + té",h:"5:30"},{id:"m6",t:"5:50 — Escritura 10 min",h:"5:50"}
+  ]},
+  {id:"familia",label:"👨‍👩‍👧‍👦 Transición Familia",items:[
+    {id:"f1",t:(esVacac()?"7:00":"6:00")+" — Levantar a Iker y Missouri"+(esVacac()?" (vacaciones)":""),h:esVacac()?"7:00":"6:00"},
+    {id:"f2",t:(esVacac()?"7:30":"6:30")+" — Desayuno familiar",h:esVacac()?"7:30":"6:30"}
+  ]},
+  {id:"agradecimientos",label:"🙏 Agradecimientos",items:[
+    {id:"ag1",t:"10:00 am — Escribir 3 agradecimientos",h:"10:00"},
+    {id:"ag2",t:"Enviar agradecimiento al grupo familiar",h:""}
+  ]},
+  {id:"crm",label:"📊 CRM / Agenda",items:[
+    {id:"c1",t:"8:00 am — Enviar agenda CRM al gerente",h:"8:00"}
+  ]},
+  {id:"profesional",label:"💼 Profesional (guardia)",items:[
+    {id:"p1",t:"Iniciar guardia (9am / 12:30pm / 4pm)",h:""},{id:"p2",t:"Revisar captura de prospectos",h:""},
+    {id:"p3",t:"Retroalimentación de prospectos",h:""},{id:"p4",t:"Publicar promo en WhatsApp",h:""},
+    {id:"p5",t:"Prospección / seguimiento",h:""},{id:"p6",t:"Publicación en redes de empresa",h:""},
+    {id:"p7",t:"Publicar en Marketplace",h:""},{id:"p8",t:"Reporte de KPIs del día",h:""}
+  ]},
+  {id:"negocio",label:"🛒 Negocio Extra — Tech",items:[
+    {id:"n1",t:"Publicar 1 artículo tech en Marketplace",h:""}
+  ]},
+  {id:"solofrases",label:"✨ @solofrases TikTok",items:[
+    {id:"sf1",t:"Crear frase en Canva y subir a TikTok",h:""},{id:"sf2",t:"Subir 2da frase o programarla",h:""}
+  ]},
+  {id:"clipviral",label:"📱 Clip Viral (video reacciones FB)",items:[
+    {id:"cv1",t:"Descargar 3 videos para reacción",h:""},{id:"cv2",t:"Grabar la video reacción",h:""},
+    {id:"cv3",t:"Programar / subir la reacción",h:""}
+  ]},
+  {id:"adanfederico",label:"🎬 Adán Federico — Marca Personal",items:[
+    {id:"af1",t:"Grabar 1 video (consejo inmobiliario)",h:""},{id:"af2",t:"Subir video a TikTok",h:""},
+    {id:"af3",t:"Subir video a Facebook",h:""}
+  ]},
+  {id:"noche",label:"🌙 Cierre del Día",items:[
+    {id:"no1",t:"8:00 pm — Humor y cena con Iker y Missouri",h:"8:00 pm"},
+    {id:"no2",t:"Gesto o detalle hacia Denisse",h:""},
+    {id:"no3",t:"Preparar ropa y tenis para mañana",h:"9:00 pm"},
+    {id:"no4",t:"Apagar pantallas — dormir antes 9:30 pm",h:"9:30 pm"}
+  ]}
+];
 
-    // ── STORAGE usando localStorage (más confiable en PWA) ──────────────────
-    const LS = {
-      get: (k) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):null; } catch(_){return null;} },
-      set: (k,v) => { try { localStorage.setItem(k,JSON.stringify(v)); } catch(_){} },
-    };
+const ESFERAS=[
+  {id:"finanzas",label:"Finanzas",icon:"💰"},
+  {id:"proyectos",label:"Proyectos",icon:"📋"},
+  {id:"salud",label:"Salud",icon:"🏃"},
+  {id:"emocional",label:"Emocional",icon:"🧘"},
+  {id:"personal",label:"Desarrollo",icon:"🎯"},
+  {id:"profesional",label:"Profesional",icon:"💼"},
+  {id:"relaciones",label:"Relaciones",icon:"🤝"},
+  {id:"proposito",label:"Propósito",icon:"🌟"}
+];
 
-    const STORAGE_KEY = "ncb-main";
-    const CHECKS_KEY  = "ncb-checks";
-    const RELCH_KEY   = "ncb-relch";
+const DEUDAS_INIT=[
+  {id:1,a:"Orlando Cota",m:15000,e:3000,ab:0,n:"+20% prometido"},
+  {id:2,a:"Manuel",m:13000,e:0,ab:0,n:"Préstamo personal"},
+  {id:3,a:"Papá",m:2000,e:0,ab:1000,n:"Préstamos acumulados"},
+  {id:4,a:"Verónica",m:10000,e:0,ab:0,n:"Pendiente"},
+  {id:5,a:"Sra. Mary",m:24000,e:0,ab:0,n:"Monto por confirmar"}
+];
 
-    // ── PALETA ───────────────────────────────────────────────────────────────
-    const G = {
-      claro:"#ccdece", medio:"#a8c8aa", oscuro:"#7aaa7e",
-      header:"#4a7a50", dark:"#2d5a32", bg:"#e8f0e8",
-      white:"rgba(255,255,255,0.7)", border:"rgba(74,122,80,0.25)",
-      muted:"#5a7a5e", text:"#1a2e1c",
-      danger:"#c0392b", warning:"#b07800", accent:"#4a7a50",
-    };
-    const SEC_BG = [G.claro,G.medio,G.claro,G.medio,G.claro,G.medio,G.claro,G.medio,G.claro,G.medio];
+const GASTOS=[
+  {l:"Auto Denisse",m:10000,u:true},{l:"Hipoteca",m:6000,u:false},
+  {l:"Alimentación",m:7000,u:false},{l:"Luz (verano)",m:3000,u:true},
+  {l:"Agua",m:550,u:false},{l:"Internet",m:600,u:false},
+  {l:"Gas",m:350,u:false},{l:"Colegiatura Iker",m:8250,u:true}
+];
 
-    const ESFERAS = [
-      {id:"finanzas",label:"Finanzas",icon:"💰",color:G.header},
-      {id:"proyectos",label:"Proyectos",icon:"📋",color:G.oscuro},
-      {id:"salud",label:"Salud Física",icon:"🏃",color:G.header},
-      {id:"emocional",label:"Emocional",icon:"🧘",color:G.oscuro},
-      {id:"personal",label:"Desarrollo",icon:"🎯",color:G.header},
-      {id:"profesional",label:"Profesional",icon:"💼",color:G.oscuro},
-      {id:"relaciones",label:"Relaciones",icon:"🤝",color:G.header},
-      {id:"proposito",label:"Propósito",icon:"🌟",color:G.oscuro},
-    ];
+const ITEMS_INIT={
+  finanzas:[
+    {id:1,t:"Saldar deuda Orlando Cota ($18,000)",p:"urgente",e:"pendiente"},
+    {id:2,t:"Saldar deuda Sra. Mary ($24,000)",p:"urgente",e:"pendiente"},
+    {id:3,t:"Saldar deuda Manuel ($13,000)",p:"urgente",e:"pendiente"},
+    {id:4,t:"Saldar deuda Verónica ($10,000)",p:"urgente",e:"pendiente"},
+    {id:5,t:"Saldar deuda Papá ($2,000)",p:"urgente",e:"pendiente"},
+    {id:6,t:"Pagar colegiatura atrasada Iker",p:"urgente",e:"pendiente"},
+    {id:7,t:"Armar catálogo tech mayorista 15 productos",p:"urgente",e:"pendiente"},
+    {id:8,t:"Registrar gastos hormiga",p:"importante",e:"pendiente"},
+    {id:9,t:"AFORE/CETES ahorro retiro",p:"meta",e:"pendiente"}
+  ],
+  proyectos:[
+    {id:101,t:"@solofrases: activar monetización Creator Fund",p:"urgente",e:"pendiente"},
+    {id:102,t:"@solofrases: buscar colaboraciones (80k)",p:"importante",e:"pendiente"},
+    {id:103,t:"Tech mayorista: catálogo álbum WhatsApp",p:"urgente",e:"pendiente"},
+    {id:104,t:"Playeras: digitalizar monito basketball",p:"importante",e:"pendiente"},
+    {id:105,t:"Playeras: investigar Printful/Printify",p:"importante",e:"pendiente"}
+  ],
+  salud:[
+    {id:201,t:"Lun/Mié/Vie: estiramiento 10 min",p:"urgente",e:"pendiente"},
+    {id:202,t:"Lun/Mié/Vie: caminata + trote 10-15 min",p:"urgente",e:"pendiente"},
+    {id:203,t:"Lun/Mié/Vie: 3×10 flexiones",p:"urgente",e:"pendiente"},
+    {id:204,t:"Lun/Mié/Vie: 250 saltos con cuerda",p:"urgente",e:"pendiente"}
+  ],
+  emocional:[
+    {id:301,t:"Gratitud diaria — 3 cosas",p:"urgente",e:"pendiente"},
+    {id:302,t:"Practicar la fe — oración 5 min",p:"urgente",e:"pendiente"},
+    {id:303,t:"Conectar con la naturaleza 15 min",p:"importante",e:"pendiente"},
+    {id:304,t:"Mantener actitud positiva",p:"urgente",e:"pendiente"}
+  ],
+  personal:[
+    {id:601,t:"📚 Leer 1 libro completo este mes",p:"meta",e:"pendiente"},
+    {id:602,t:"🎓 Mes 1: Curso monetización de redes",p:"meta",e:"pendiente"},
+    {id:603,t:"🤖 Mes 2: Curso de IA",p:"meta",e:"pendiente"},
+    {id:604,t:"🏆 Retomar temas de ventas",p:"meta",e:"pendiente"}
+  ],
+  profesional:[
+    {id:401,t:"🥇 META: Primer lugar en ventas",p:"meta",e:"pendiente"},
+    {id:402,t:"🌐 META: Emprendimiento digital",p:"meta",e:"pendiente"},
+    {id:403,t:"🍽️ META: Negocio físico",p:"meta",e:"pendiente"},
+    {id:404,t:"Seguimiento prospectos calientes",p:"urgente",e:"pendiente"}
+  ],
+  relaciones:[
+    {id:501,t:"Ser referente en el trabajo",p:"meta",e:"pendiente"},
+    {id:502,t:"Retomar amistades importantes",p:"importante",e:"pendiente"},
+    {id:503,t:"Llamar o visitar a papás",p:"importante",e:"pendiente"}
+  ],
+  proposito:[
+    {id:701,t:"¿Qué quiero que mis hijos recuerden de mí?",p:"meta",e:"pendiente"},
+    {id:702,t:"Definir mi legado en una frase",p:"meta",e:"pendiente"},
+    {id:703,t:"Construir algo duradero",p:"meta",e:"pendiente"}
+  ]
+};
 
-    const PRIORIDADES = [
-      {id:"urgente",label:"Urgente",color:G.danger},
-      {id:"importante",label:"Importante",color:G.warning},
-      {id:"meta",label:"Meta",color:G.header},
-    ];
+const RCHECK_INIT=[
+  {id:"r1",t:"Gesto o detalle hacia Denisse"},
+  {id:"r2",t:"Momento con Iker"},
+  {id:"r3",t:"Momento con Missouri"},
+  {id:"r4",t:"Comunicación proactiva en el trabajo"}
+];
 
-    const DIAS_FULL = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-    const EXCLUIR_PROGRESO = ["mananas","familia"];
+const PC={urgente:"#c0392b",importante:"#b07800",meta:"#4a7a50"};
 
-    const hoyKey = () => new Date().toISOString().split("T")[0];
-    const diasemana = () => { const d=new Date().getDay(); return d===0?6:d-1; };
-    const esVacacional = () => { const h=new Date(),m=h.getMonth()+1,d=h.getDate(); return (m===6&&d>=26)||m===7||(m===8&&d<=20); };
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let STATE={
+  tab:"checklist",
+  esfera:"finanzas",
+  finTab:"items",
+  niveles:{finanzas:5,proyectos:5,salud:5,emocional:5,personal:5,profesional:5,relaciones:5,proposito:5},
+  items:JSON.parse(JSON.stringify(ITEMS_INIT)),
+  deudas:JSON.parse(JSON.stringify(DEUDAS_INIT)),
+  checks:{},
+  relChecks:{},
+  secOpen:{},
+  chat:[],
+  historial:{},
+  abonoInput:{}
+};
 
-    const buildChecklist = () => {
-      const vacac=esVacacional();
-      const hL=vacac?"7:00":"6:00"; const hD=vacac?"7:30":"6:30";
-      return [
-        {id:"mananas",label:"🌅 Mañanas Milagrosas",items:[
-          {id:"m1",texto:"4:40 am — Despertar",hora:"4:40"},
-          {id:"m2",texto:"4:45 — Silencio 5 min",hora:"4:45"},
-          {id:"m3",texto:"4:50 — Visualización 5 min",hora:"4:50"},
-          {id:"m4",texto:"5:00 — Ejercicio 30 min",hora:"5:00"},
-          {id:"m5",texto:"5:30 — Lectura 20 min + té",hora:"5:30"},
-          {id:"m6",texto:"5:50 — Escritura 10 min",hora:"5:50"},
-        ]},
-        {id:"familia",label:"👨‍👩‍👧‍👦 Transición Familia",items:[
-          {id:"f1",texto:`${hL} — Levantar a Iker y Missouri${vacac?" (vacaciones)":""}`,hora:hL},
-          {id:"f2",texto:`${hD} — Desayuno familiar`,hora:hD},
-        ]},
-        {id:"agradecimientos",label:"🙏 Agradecimientos",items:[
-          {id:"ag1",texto:"10:00 am — Escribir 3 agradecimientos",hora:"10:00"},
-          {id:"ag2",texto:"Enviar mensaje al grupo familiar",hora:"10:00"},
-        ]},
-        {id:"crm",label:"📊 CRM / Agenda",items:[
-          {id:"c1",texto:"8:00 am — Enviar agenda CRM al gerente",hora:"8:00"},
-        ]},
-        {id:"profesional",label:"💼 Profesional (guardia)",items:[
-          {id:"p1",texto:"Iniciar guardia (9am / 12:30pm / 4pm)",hora:""},
-          {id:"p2",texto:"Revisar captura de prospectos",hora:""},
-          {id:"p3",texto:"Retroalimentación de prospectos",hora:""},
-          {id:"p4",texto:"Publicar promo en WhatsApp",hora:""},
-          {id:"p5",texto:"Prospección / seguimiento de clientes",hora:""},
-          {id:"p6",texto:"Publicación en redes de la empresa",hora:""},
-          {id:"p7",texto:"Publicar en Marketplace",hora:""},
-          {id:"p8",texto:"Reporte de KPIs del día",hora:""},
-        ]},
-        {id:"negocio",label:"🛒 Negocio Extra — Tech",items:[
-          {id:"n1",texto:"Publicar mínimo 1 artículo tech en Marketplace",hora:""},
-        ]},
-        {id:"solofrases",label:"✨ @solofrases TikTok",items:[
-          {id:"sf1",texto:"Crear frase en Canva y subir a @solofrases",hora:""},
-          {id:"sf2",texto:"Subir 2da frase o programarla",hora:""},
-        ]},
-        {id:"clipviral",label:"📱 Clip Viral (video reacciones FB)",items:[
-          {id:"cv1",texto:"Descargar 3 videos para reacción",hora:""},
-          {id:"cv2",texto:"Grabar la video reacción",hora:""},
-          {id:"cv3",texto:"Programar / subir la reacción",hora:""},
-        ]},
-        {id:"adanfederico",label:"🎬 Adán Federico — Marca Personal",items:[
-          {id:"af1",texto:"Grabar 1 video (consejo inmobiliario)",hora:""},
-          {id:"af2",texto:"Subir video a TikTok",hora:""},
-          {id:"af3",texto:"Subir video a Facebook",hora:""},
-        ]},
-        {id:"noche",label:"🌙 Cierre del Día",items:[
-          {id:"no1",texto:"8:00 pm — Humor y cena con Iker y Missouri",hora:"8:00 pm"},
-          {id:"no2",texto:"Gesto o detalle hacia Denisse",hora:""},
-          {id:"no3",texto:"Preparar ropa y tenis para mañana",hora:"9:00 pm"},
-          {id:"no4",texto:"Apagar pantallas — dormir antes 9:30 pm",hora:"9:30 pm"},
-        ]},
-      ];
-    };
+// Cargar desde localStorage
+const saved=LS.get(K.main);
+if(saved){
+  if(saved.niveles) STATE.niveles=saved.niveles;
+  if(saved.items) STATE.items=saved.items;
+  if(saved.deudas) STATE.deudas=saved.deudas;
+  if(saved.chat) STATE.chat=saved.chat;
+  if(saved.historial) STATE.historial=saved.historial;
+}
+const ck=LS.get(K.checks); if(ck) STATE.checks=ck;
+const rl=LS.get(K.rel); if(rl) STATE.relChecks=rl;
 
-    const mk=(id,texto,prioridad,dia,notas="")=>({id,texto,prioridad,dia,estado:"pendiente",notas,creada:hoyKey()});
+function saveMain(){
+  LS.set(K.main,{niveles:STATE.niveles,items:STATE.items,deudas:STATE.deudas,chat:STATE.chat,historial:STATE.historial});
+}
+function saveCk(){LS.set(K.checks,STATE.checks)}
+function saveRl(){LS.set(K.rel,STATE.relChecks)}
 
-    const CONTENT_INIT = {
-      finanzas:{items:[
-        mk(1,"Saldar deuda con Orlando Cota ($18,000)","urgente",0),
-        mk(2,"Saldar deuda con Sra. Mary ($24,000)","urgente",1),
-        mk(3,"Saldar deuda con Manuel ($13,000)","urgente",2),
-        mk(4,"Saldar deuda con Verónica ($10,000)","urgente",3),
-        mk(5,"Saldar deuda con Papá ($2,000)","urgente",4),
-        mk(6,"Pagar colegiatura atrasada Iker","urgente",0),
-        mk(7,"Armar catálogo tech mayorista","urgente",1),
-        mk(8,"Registrar y reducir gastos hormiga","importante",2),
-        mk(9,"AFORE/CETES — ahorro retiro desde $500/mes","meta",5),
-      ]},
-      proyectos:{items:[
-        mk(101,"@solofrases: activar monetización Creator Fund","urgente",0),
-        mk(102,"@solofrases: buscar colaboraciones (80k)","importante",2),
-        mk(103,"Tech mayorista: armar catálogo álbum WhatsApp","urgente",1),
-        mk(104,"Playeras: digitalizar monito basketball","importante",5),
-        mk(105,"Playeras: investigar Printful/Printify","importante",5),
-        mk(106,"Adán Federico: definir pilares de contenido","importante",0),
-      ]},
-      salud:{items:[]},
-      emocional:{items:[
-        mk(301,"Practicar la gratitud diaria","urgente",0),
-        mk(302,"Practicar la fe — oración 5 min","urgente",0),
-        mk(303,"Conectar con la naturaleza — 15 min","importante",1),
-        mk(304,"Mantener actitud positiva","urgente",0),
-      ]},
-      personal:{items:[
-        mk(601,"📚 Leer 1 libro completo este mes","meta",0,"10 páginas mínimo al día"),
-        mk(602,"🎓 Mes 1: Curso de monetización de redes","meta",0),
-        mk(603,"🤖 Mes 2: Curso de IA","meta",0),
-        mk(604,"🏆 Retomar temas de ventas","meta",0),
-      ]},
-      profesional:{items:[
-        mk(401,"🥇 META: Primer lugar en ventas","meta",0),
-        mk(402,"🌐 META: Emprendimiento digital","meta",0),
-        mk(403,"🍽️ META: Negocio físico","meta",0),
-        mk(404,"Seguimiento a prospectos calientes","urgente",0),
-        mk(405,"Revisar KPIs semanales","importante",6),
-      ]},
-      relaciones:{
-        checklist:[
-          {id:"r1",texto:"Gesto o detalle hacia Denisse"},
-          {id:"r2",texto:"Momento con Iker"},
-          {id:"r3",texto:"Momento con Missouri"},
-          {id:"r4",texto:"Comunicación proactiva en el trabajo"},
-        ],
-        items:[
-          mk(501,"Ser referente en el trabajo","meta",0),
-          mk(502,"Retomar amistades importantes","importante",3),
-          mk(503,"Rodearte de personas que impulsen","meta",5),
-        ],
-      },
-      proposito:{items:[
-        mk(701,"Escribir: ¿qué quiero que mis hijos recuerden?","meta",0),
-        mk(702,"Definir mi legado en una frase","meta",6),
-        mk(703,"Construir algo duradero","meta",0),
-      ]},
-    };
+const hoy=hoyISO();
+const ckKey=(s,i)=>`${hoy}-${s}-${i}`;
+const isCk=(s,i)=>!!STATE.checks[ckKey(s,i)];
+const isRl=(id)=>!!STATE.relChecks[`${hoy}-rel-${id}`];
 
-    const DEUDAS_INIT = [
-      {id:1,acreedor:"Orlando Cota",monto:15000,extra:3000,abonado:0,nota:"+20% prometido"},
-      {id:2,acreedor:"Manuel",monto:13000,extra:0,abonado:0,nota:"Préstamo personal"},
-      {id:3,acreedor:"Papá",monto:2000,extra:0,abonado:0,nota:"Préstamos acumulados"},
-      {id:4,acreedor:"Verónica",monto:10000,extra:0,abonado:0,nota:"Pendiente de pago"},
-      {id:5,acreedor:"Sra. Mary",monto:24000,extra:0,abonado:0,nota:"Monto por confirmar"},
-    ];
+// Calcular progreso
+function getProgress(){
+  const sAct=SECCIONES.filter(s=>!EXCLUIR.includes(s.id));
+  const total=sAct.flatMap(s=>s.items).length;
+  const done=sAct.flatMap(s=>s.items.filter(i=>isCk(s.id,i.id))).length;
+  return{total,done,pct:total?Math.round(done/total*100):0};
+}
 
-    const GASTOS_FIJOS = [
-      {label:"Auto Denisse",monto:10000,nota:"Cada 1° del mes",u:true},
-      {label:"Hipoteca",monto:6000,nota:"Mensual",u:false},
-      {label:"Alimentación",monto:7000,nota:"Estimado mensual",u:false},
-      {label:"Luz (verano)",monto:3000,nota:"Bimestral — próx. julio",u:true},
-      {label:"Agua",monto:550,nota:"Mensual",u:false},
-      {label:"Internet",monto:600,nota:"Mensual",u:false},
-      {label:"Gas",monto:350,nota:"Mensual",u:false},
-      {label:"Colegiatura Iker",monto:8250,nota:"5 meses — ATRASADO",u:true},
-    ];
+function promedio(){
+  const v=Object.values(STATE.niveles);
+  return Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10;
+}
 
-    const defaultReg=()=>{const r={};ESFERAS.forEach(e=>{r[e.id]={nivel:5}});return r;};
-    const prioColor={urgente:G.danger,importante:G.warning,meta:G.header};
-    const card=(extra={})=>({background:G.white,border:`1px solid ${G.border}`,borderRadius:14,padding:"14px 16px",...extra});
+// Semanas para historial
+function getSemanaKey(fecha){
+  const d=new Date(fecha+"T12:00:00"),day=d.getDay();
+  const diff=d.getDate()-(day===0?6:day-1);
+  const l=new Date(d.setDate(diff));
+  return l.toISOString().split("T")[0];
+}
 
-    const getSemanaKey=(fecha)=>{
-      const d=new Date(fecha+"T12:00:00"),day=d.getDay(),diff=d.getDate()-(day===0?6:day-1);
-      return new Date(new Date(fecha+"T12:00:00").setDate(diff)).toISOString().split("T")[0];
-    };
-    const fmtSemana=(lk)=>{
-      const l=new Date(lk+"T12:00:00"),do2=new Date(l);do2.setDate(l.getDate()+6);
-      const o={day:"2-digit",month:"short"};
-      return `${l.toLocaleDateString("es-MX",o)} — ${do2.toLocaleDateString("es-MX",o)}`;
-    };
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById("app");
+  const pr=getProgress();
+  const prom=promedio();
+  const promColor=prom>=7?"#4a7a50":prom>=5?"#b07800":"#c0392b";
+  const fechaFull=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
-    function AddInline({onAdd,color}){
-      const [t,setT]=React.useState("");
-      return(
-        <div style={{display:"flex",gap:6,padding:"7px 12px",background:"rgba(255,255,255,0.4)"}}>
-          <input value={t} onChange={e=>setT(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&t.trim()){onAdd(t);setT("");}}}
-            placeholder="+ Agregar ítem..." style={{flex:1,fontSize:12,padding:"5px 9px",borderRadius:7,border:`1px solid ${color}55`,background:"rgba(255,255,255,0.7)",color:G.text,outline:"none"}}/>
-          <button onClick={()=>{if(t.trim()){onAdd(t);setT("");}}} style={{padding:"5px 11px",borderRadius:7,fontSize:11,background:color,border:"none",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
-        </div>
-      );
-    }
+  // Guardar snapshot del día en historial
+  STATE.historial[hoy]={...STATE.historial[hoy],...STATE.niveles,ckTotal:pr.total,ckDone:pr.done};
+  saveMain();
 
-    function App(){
-      const [tab,setTab]=useState("checklist");
-      const [esferaTab,setEsferaTab]=useState("finanzas");
-      const [finTab,setFinTab]=useState("items");
-      const [historial,setHistorial]=useState({});
-      const [hoy,setHoy]=useState(defaultReg());
-      const [content,setContent]=useState(CONTENT_INIT);
-      const [checkDay,setCheckDay]=useState({});
-      const [relCheck,setRelCheck]=useState({});
-      const [deudas,setDeudas]=useState(DEUDAS_INIT);
-      const [abonoIn,setAbonoIn]=useState({});
-      const [secs,setSecs]=useState(buildChecklist());
-      const [secOpen,setSecOpen]=useState({});
-      const [chat,setChat]=useState([]);
-      const [inp,setInp]=useState("");
-      const [cargando,setCargando]=useState(false);
-      const [loaded,setLoaded]=useState(false);
-      const [editando,setEditando]=useState(null);
-      const [editTxt,setEditTxt]=useState("");
-      const [nuevaAct,setNuevaAct]=useState({texto:"",prioridad:"importante",dia:diasemana(),notas:""});
-      const chatRef=useRef(null);
-      const hoyStr=hoyKey();
+  let html=`
+  <div class="header">
+    <div>
+      <div style="font-size:20px;font-weight:700;color:#2d5a32">🧠 Nuevo Cerebro</div>
+      <div style="font-size:10px;color:#5a7a5e;margin-top:2px;text-transform:capitalize">${fechaFull}</div>
+    </div>
+    <div class="index-box">
+      <div style="font-size:22px;font-weight:700;color:${promColor};line-height:1">${prom}</div>
+      <div style="font-size:8px;color:#5a7a5e;text-transform:uppercase">índice vida</div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    ${[["checklist","✅ Mi Día"],["esferas","🌐 Esferas"],["historial","📈 Historial"],["chat","🧠 IA"]].map(([id,lbl])=>
+      `<button class="btn ${STATE.tab===id?"btn-primary":"btn-secondary"}" onclick="setTab('${id}')">${lbl}</button>`
+    ).join("")}
+  </div>`;
 
-      useEffect(()=>{
-        const d=LS.get(STORAGE_KEY);
-        if(d){
-          if(d.historial) setHistorial(d.historial);
-          if(d.historial?.[hoyStr]) setHoy(d.historial[hoyStr]);
-          if(d.content) setContent(p=>({...CONTENT_INIT,...d.content}));
-          if(d.deudas) setDeudas(d.deudas);
-          if(d.chat) setChat(d.chat);
-          if(d.secs) setSecs(d.secs);
-        }
-        const ck=LS.get(CHECKS_KEY); if(ck) setCheckDay(ck);
-        const rk=LS.get(RELCH_KEY); if(rk) setRelCheck(rk);
-        setLoaded(true);
-      },[]);
+  // ── MI DÍA ──
+  if(STATE.tab==="checklist"){
+    html+=`<div class="card">
+      <div style="font-size:15px;font-weight:700;color:#2d5a32;text-transform:capitalize;margin-bottom:4px">${fechaFull}</div>
+      ${esVacac()?'<div style="font-size:9px;color:#b07800;margin-bottom:4px">☀️ Periodo vacacional — Horario 7am</div>':""}
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;color:#5a7a5e">Progreso del día</span>
+        <span style="font-size:11px;font-weight:700;color:#4a7a50">${pr.done}/${pr.total} — ${pr.pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pr.pct}%"></div></div>
+      ${pr.pct===100?'<div style="text-align:center;font-size:12px;color:#2d5a32;font-weight:700;margin-top:6px">🎉 ¡Día completado!</div>':""}
+    </div>`;
 
-      const saveMain=(overrides={})=>{
-        LS.set(STORAGE_KEY,{historial:{...historial,[hoyStr]:hoy},content,deudas,chat,secs,...overrides});
-      };
-
-      useEffect(()=>{ if(loaded) saveMain(); },[hoy,historial,content,deudas,chat,secs,loaded]);
-      useEffect(()=>{ if(chatRef.current) chatRef.current.scrollTop=chatRef.current.scrollHeight; },[chat]);
-
-      const ckKey=(s,i)=>`${hoyStr}-${s}-${i}`;
-      const isCk=(s,i)=>!!checkDay[ckKey(s,i)];
-      const togCk=(s,i)=>{const n={...checkDay,[ckKey(s,i)]:!checkDay[ckKey(s,i)]};setCheckDay(n);LS.set(CHECKS_KEY,n);};
-
-      const secsActivas=secs.filter(s=>!EXCLUIR_PROGRESO.includes(s.id));
-      const totalCk=secsActivas.flatMap(s=>s.items).length;
-      const doneCk=secsActivas.flatMap(s=>s.items.map(i=>isCk(s.id,i.id)?1:0)).reduce((a,b)=>a+b,0);
-      const pctDia=totalCk?Math.round(doneCk/totalCk*100):0;
-
-      const rlKey=(id)=>`${hoyStr}-rel-${id}`;
-      const isRl=(id)=>!!relCheck[rlKey(id)];
-      const togRl=(id)=>{const n={...relCheck,[rlKey(id)]:!relCheck[rlKey(id)]};setRelCheck(n);LS.set(RELCH_KEY,n);};
-
-      const eItems=(e)=>content[e]?.items||[];
-      const addItem=(esfera)=>{
-        if(!nuevaAct.texto.trim()) return;
-        const n={...content,[esfera]:{...content[esfera],items:[...(content[esfera]?.items||[]),{id:Date.now(),texto:nuevaAct.texto,prioridad:nuevaAct.prioridad,dia:+nuevaAct.dia,estado:"pendiente",notas:nuevaAct.notas,creada:hoyStr}]}};
-        setContent(n);saveMain({content:n});
-        setNuevaAct({texto:"",prioridad:"importante",dia:diasemana(),notas:""});
-      };
-      const delItem=(esfera,id)=>{const n={...content,[esfera]:{...content[esfera],items:content[esfera].items.filter(x=>x.id!==id)}};setContent(n);saveMain({content:n});};
-      const togEstado=(esfera,id)=>{const n={...content,[esfera]:{...content[esfera],items:content[esfera].items.map(x=>x.id===id?{...x,estado:x.estado==="hecho"?"pendiente":x.estado==="pendiente"?"en progreso":"hecho"}:x)}};setContent(n);saveMain({content:n});};
-      const saveEdit=(esfera,id)=>{const n={...content,[esfera]:{...content[esfera],items:content[esfera].items.map(x=>x.id===id?{...x,texto:editTxt}:x)}};setContent(n);saveMain({content:n});setEditando(null);};
-      const addCk=(sid,txt)=>{if(!txt.trim())return;setSecs(ss=>ss.map(s=>s.id===sid?{...s,items:[...s.items,{id:`c-${Date.now()}`,texto:txt,hora:""}]}:s));};
-      const delCk=(sid,iid)=>setSecs(ss=>ss.map(s=>s.id===sid?{...s,items:s.items.filter(i=>i.id!==iid)}:s));
-      const abonar=(id)=>{const m=+abonoIn[id];if(!m||m<=0)return;const n=deudas.map(d=>d.id===id?{...d,abonado:Math.min(d.abonado+m,d.monto+d.extra)}:d);setDeudas(n);saveMain({deudas:n});setAbonoIn(a=>({...a,[id]:""}));};
-      const updNivel=(id,v)=>setHoy(d=>({...d,[id]:{...d[id],nivel:+v}}));
-      const prom=(reg)=>{const v=ESFERAS.map(e=>reg[e.id]?.nivel??5);return Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10;};
-      const promHoy=prom(hoy);
-      const promColor=promHoy>=7?G.header:promHoy>=5?G.warning:G.danger;
-      const totalDeudas=deudas.reduce((s,d)=>s+d.monto+d.extra-d.abonado,0);
-      const totalGastos=GASTOS_FIJOS.reduce((s,g)=>s+g.monto,0);
-      const fechaFull=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-
-      const getSemanas=()=>{
-        const sm={};
-        const snap={...historial,[hoyStr]:{...historial[hoyStr],...hoy,ckTotal:totalCk,ckDone:doneCk}};
-        Object.entries(snap).forEach(([fecha,reg])=>{
-          const sk=getSemanaKey(fecha);
-          if(!sm[sk]) sm[sk]={dias:[],ck:0,n:0};
-          const fo=new Date(fecha+"T12:00:00");
-          const fc=fo.toLocaleDateString("es-MX",{weekday:"short",day:"2-digit"});
-          const cp=reg.ckTotal?Math.round(reg.ckDone/reg.ckTotal*100):0;
-          sm[sk].dias.push({fecha,fc,cp,esHoy:fecha===hoyStr});
-          sm[sk].ck+=cp;sm[sk].n++;
+    SECCIONES.forEach((sec,si)=>{
+      const bg=si%2===0?"sec-body-a":"sec-body-b";
+      const hechas=sec.items.filter(i=>isCk(sec.id,i.id)).length;
+      const excluida=EXCLUIR.includes(sec.id);
+      const abierta=STATE.secOpen[sec.id]!==false;
+      html+=`<div style="border-radius:11px;margin-bottom:6px;overflow:hidden;box-shadow:0 1px 3px rgba(42,90,50,.1)">
+        <div class="sec-header" onclick="toggleSec('${sec.id}')">
+          <span>${sec.label}${excluida?" ⏸":""}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(255,255,255,0.25);font-weight:600">${hechas}/${sec.items.length}</span>
+            <span style="font-size:11px;opacity:.8">${abierta?"▲":"▼"}</span>
+          </div>
+        </div>`;
+      if(abierta){
+        html+=`<div class="${bg}">`;
+        sec.items.forEach(item=>{
+          const done=isCk(sec.id,item.id);
+          html+=`<div class="check-item" onclick="${excluida?"":"togCk('"+sec.id+"','"+item.id+"')"}">
+            <div class="check-box${done?" done":""}">${done?"<span style='font-size:10px;color:#fff;font-weight:700'>✓</span>":""}</div>
+            <div>
+              <div class="check-text${done?" done":""}">${item.t}</div>
+              ${item.h?`<div class="check-hora">🕐 ${item.h}</div>`:""}
+            </div>
+          </div>`;
         });
-        return Object.entries(sm).sort(([a],[b])=>b.localeCompare(a)).slice(0,8).map(([sk,v])=>({
-          sk,label:fmtSemana(sk),ckAvg:v.n?Math.round(v.ck/v.n):0,
-          dias:v.dias.sort((a,b)=>a.fecha.localeCompare(b.fecha)),
-        }));
-      };
+        html+=`<div style="display:flex;gap:6px;padding:7px 12px;background:rgba(255,255,255,0.3)">
+          <input id="add-${sec.id}" placeholder="+ Agregar ítem..." onkeydown="if(event.key==='Enter')addCkItem('${sec.id}')" style="flex:1"/>
+          <button class="btn btn-primary" style="padding:5px 10px;font-size:11px" onclick="addCkItem('${sec.id}')">+</button>
+        </div></div>`;
+      }
+      html+="</div>";
+    });
+  }
 
-      const sendChat=async()=>{
-        if(!inp.trim()||cargando) return;
-        const msg=inp.trim();setInp("");
-        const nc=[...chat,{role:"user",content:msg}];setChat(nc);setCargando(true);
-        const rs=ESFERAS.map(e=>`${e.label}: ${hoy[e.id]?.nivel??5}/10`).join(", ");
-        const dr=deudas.map(d=>`${d.acreedor}: $${(d.monto+d.extra-d.abonado).toLocaleString()}`).join(", ");
-        try{
-          const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
-              system:`Eres el "Nuevo Cerebro" de Adán Federico, 49 años, vendedor inmobiliario México. Español, directo, cálido. Estado: ${rs}. Deudas: ${dr}. Máx 3 párrafos.`,
-              messages:nc})});
-          const d=await r.json();
-          setChat([...nc,{role:"assistant",content:d.content?.map(b=>b.text||"").join("")||"Sin respuesta."}]);
-        }catch(_){setChat([...nc,{role:"assistant",content:"Error de conexión."}]);}
-        setCargando(false);
-      };
+  // ── ESFERAS ──
+  if(STATE.tab==="esferas"){
+    html+=`<div style="display:flex;flex-wrap:wrap;margin-bottom:12px">`;
+    ESFERAS.forEach(e=>{
+      html+=`<button class="esfera-btn${STATE.esfera===e.id?" active":""}" onclick="setEsfera('${e.id}')">${e.icon} ${e.label}</button>`;
+    });
+    html+="</div>";
 
-      const tabSt=(t)=>({padding:"8px 16px",borderRadius:20,fontSize:12,fontWeight:tab===t?700:400,cursor:"pointer",
-        background:tab===t?G.header:"rgba(255,255,255,0.5)",border:`1px solid ${tab===t?G.header:G.border}`,
-        color:tab===t?"#fff":G.muted,transition:"all 0.2s"});
+    const esf=ESFERAS.find(e=>e.id===STATE.esfera);
+    const nivel=STATE.niveles[STATE.esfera]||5;
+    html+=`<div class="card" style="background:#ccdece;border-color:#4a7a5044">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">${esf.icon}</span><span style="font-size:14px;font-weight:700;color:#2d5a32">${esf.label}</span></div>
+        <span style="font-size:20px;font-weight:700;color:#4a7a50">${nivel}<span style="font-size:10px;color:#5a7a5e">/10</span></span>
+      </div>
+      <input type="range" min="1" max="10" value="${nivel}" oninput="setNivel('${STATE.esfera}',this.value)" style="width:100%;accent-color:#4a7a50"/>
+    </div>`;
 
-      return(
-        <div style={{background:G.bg,minHeight:"100vh",padding:"1rem",color:G.text}}>
-          {/* HEADER */}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1rem"}}>
-            <div>
-              <div style={{fontSize:20,fontWeight:700,color:G.dark}}>🧠 Nuevo Cerebro</div>
-              <div style={{fontSize:10,color:G.muted,marginTop:2,textTransform:"capitalize"}}>{fechaFull}</div>
+    if(STATE.esfera==="finanzas"){
+      html+=`<div style="display:flex;gap:5px;margin-bottom:10px">
+        ${[["items","Objetivos"],["deudas","Deudas"],["gastos","Gastos"]].map(([id,lbl])=>
+          `<button class="btn ${STATE.finTab===id?"btn-primary":"btn-secondary"}" onclick="setFinTab('${id}')">${lbl}</button>`
+        ).join("")}
+      </div>`;
+
+      if(STATE.finTab==="deudas"){
+        STATE.deudas.forEach(d=>{
+          const total=d.m+d.e,pend=total-d.ab,pct=Math.round(d.ab/total*100);
+          html+=`<div class="card" style="border-left:3px solid #c0392b">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <div><div style="font-size:13px;font-weight:600">${d.a}</div><div style="font-size:10px;color:#5a7a5e">${d.n}</div></div>
+              <div style="text-align:right"><div style="font-size:14px;font-weight:700;color:#c0392b">$${pend.toLocaleString()}</div><div style="font-size:9px;color:#5a7a5e">de $${total.toLocaleString()}</div></div>
             </div>
-            <div style={{background:G.white,border:`1px solid ${G.border}`,borderRadius:12,padding:"6px 12px",textAlign:"right"}}>
-              <div style={{fontSize:22,fontWeight:700,color:promColor,lineHeight:1}}>{promHoy}</div>
-              <div style={{fontSize:8,color:G.muted,textTransform:"uppercase"}}>índice vida</div>
+            <div class="deuda-bar"><div class="deuda-fill" style="width:${pct}%"></div></div>
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <input type="number" id="ab-${d.id}" placeholder="Abono $" style="flex:1"/>
+              <button class="btn btn-primary" style="padding:5px 12px;font-size:11px" onclick="abonar(${d.id})">+ Abonar</button>
             </div>
-          </div>
-          {/* TABS */}
-          <div style={{display:"flex",gap:5,marginBottom:"1rem",flexWrap:"wrap"}}>
-            {[["checklist","✅ Mi Día"],["esferas","🌐 Esferas"],["historial","📈 Historial"],["chat","🧠 IA"]].map(([id,lbl])=>(
-              <button key={id} onClick={()=>setTab(id)} style={tabSt(id)}>{lbl}</button>
-            ))}
-          </div>
+          </div>`;
+        });
+        const totalD=STATE.deudas.reduce((s,d)=>s+d.m+d.e-d.ab,0);
+        html+=`<div class="card" style="background:#ccdece"><div style="display:flex;justify-content:space-between"><span style="color:#5a7a5e">Total pendiente</span><span style="font-size:20px;font-weight:700;color:#c0392b">$${totalD.toLocaleString()}</span></div></div>`;
+      }
 
-          {/* MI DÍA */}
-          {tab==="checklist"&&(
-            <div>
-              <div style={{background:G.white,border:`1px solid ${G.border}`,borderRadius:14,padding:"12px 16px",marginBottom:10}}>
-                <div style={{fontSize:15,fontWeight:700,color:G.dark,textTransform:"capitalize",marginBottom:4}}>{fechaFull}</div>
-                {esVacacional()&&<div style={{fontSize:9,color:G.warning,marginBottom:5}}>☀️ Periodo vacacional — Horario 7am</div>}
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                  <span style={{fontSize:11,color:G.muted}}>Progreso del día</span>
-                  <span style={{fontSize:11,fontWeight:700,color:G.header}}>{doneCk}/{totalCk} — {pctDia}%</span>
-                </div>
-                <div style={{background:"rgba(74,122,80,0.15)",borderRadius:6,height:7,overflow:"hidden"}}>
-                  <div style={{width:`${pctDia}%`,height:"100%",borderRadius:6,background:G.header,transition:"width 0.5s"}}/>
-                </div>
-                {pctDia===100&&<div style={{textAlign:"center",fontSize:12,color:G.dark,marginTop:6,fontWeight:700}}>🎉 ¡Día completado!</div>}
-              </div>
-              {secs.map((sec,si)=>{
-                const bg=SEC_BG[si%SEC_BG.length];
-                const hechas=sec.items.filter(i=>isCk(sec.id,i.id)).length;
-                const abierta=secOpen[sec.id]!==false;
-                const excluida=EXCLUIR_PROGRESO.includes(sec.id);
-                return(
-                  <div key={sec.id} style={{borderRadius:11,marginBottom:6,overflow:"hidden",boxShadow:"0 1px 3px rgba(42,90,50,0.1)"}}>
-                    <div onClick={()=>setSecOpen(s=>({...s,[sec.id]:!abierta}))} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 13px",cursor:"pointer",background:G.header}}>
-                      <span style={{fontSize:12,fontWeight:700,color:"#fff"}}>{sec.label}{excluida?" ⏸":""}</span>
-                      <div style={{display:"flex",alignItems:"center",gap:6}}>
-                        <span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:"rgba(255,255,255,0.25)",color:"#fff",fontWeight:600}}>{hechas}/{sec.items.length}</span>
-                        <span style={{color:"rgba(255,255,255,0.8)",fontSize:11}}>{abierta?"▲":"▼"}</span>
-                      </div>
-                    </div>
-                    {abierta&&(
-                      <div style={{background:bg}}>
-                        {sec.items.map((item,idx)=>{
-                          const done=isCk(sec.id,item.id);
-                          return(
-                            <div key={item.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 13px",borderBottom:idx<sec.items.length-1?"1px solid rgba(74,122,80,0.18)":"none",background:done?"rgba(255,255,255,0.3)":"transparent"}}>
-                              <div onClick={()=>!excluida&&togCk(sec.id,item.id)} style={{width:18,height:18,borderRadius:4,border:`2px solid ${done?G.header:"rgba(74,122,80,0.35)"}`,background:done?G.header:"rgba(255,255,255,0.5)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:excluida?"default":"pointer",opacity:excluida?.5:1}}>
-                                {done&&<span style={{fontSize:10,color:"#fff",fontWeight:700}}>✓</span>}
-                              </div>
-                              <div style={{flex:1,cursor:excluida?"default":"pointer"}} onClick={()=>!excluida&&togCk(sec.id,item.id)}>
-                                <div style={{fontSize:12,color:done?"rgba(42,90,50,0.4)":G.dark,textDecoration:done?"line-through":"none",fontWeight:500}}>{item.texto}</div>
-                                {item.hora&&<div style={{fontSize:9,color:G.dark,marginTop:1,opacity:.6,fontWeight:600}}>🕐 {item.hora}</div>}
-                              </div>
-                              <button onClick={()=>delCk(sec.id,item.id)} style={{background:"none",border:"none",color:"rgba(42,90,50,0.2)",cursor:"pointer",fontSize:12}}>✕</button>
-                            </div>
-                          );
-                        })}
-                        <AddInline onAdd={txt=>addCk(sec.id,txt)} color={G.header}/>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* ESFERAS */}
-          {tab==="esferas"&&(
-            <div>
-              <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:12}}>
-                {ESFERAS.map(e=>{const act=esferaTab===e.id;return(<button key={e.id} onClick={()=>setEsferaTab(e.id)} style={{padding:"5px 10px",borderRadius:16,fontSize:10,cursor:"pointer",fontWeight:act?700:400,background:act?G.header:G.white,border:`1px solid ${act?G.header:G.border}`,color:act?"#fff":G.muted}}>{e.icon} {e.label}</button>);})}
-              </div>
-              {(()=>{
-                const esf=ESFERAS.find(e=>e.id===esferaTab);
-                const nivel=hoy[esferaTab]?.nivel??5;
-                const items=eItems(esferaTab);
-                return(
-                  <div>
-                    <div style={{background:G.claro,border:`1px solid ${G.border}`,borderRadius:14,padding:"14px",marginBottom:10}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                        <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:22}}>{esf.icon}</span><div style={{fontSize:14,fontWeight:700,color:G.dark}}>{esf.label}</div></div>
-                        <div style={{fontSize:20,fontWeight:700,color:G.header}}>{nivel}<span style={{fontSize:10,color:G.muted}}>/10</span></div>
-                      </div>
-                      <input type="range" min="1" max="10" value={nivel} onChange={ev=>updNivel(esferaTab,+ev.target.value)} style={{width:"100%",accentColor:G.header}}/>
-                    </div>
-                    {esferaTab==="finanzas"&&(
-                      <div style={{display:"flex",gap:5,marginBottom:10}}>
-                        {[["items","Objetivos"],["deudas","Deudas"],["gastos","Gastos"]].map(([id,lbl])=>(
-                          <button key={id} onClick={()=>setFinTab(id)} style={{padding:"4px 12px",borderRadius:16,fontSize:10,cursor:"pointer",background:finTab===id?G.header:G.white,border:`1px solid ${finTab===id?G.header:G.border}`,color:finTab===id?"#fff":G.muted}}>{lbl}</button>
-                        ))}
-                      </div>
-                    )}
-                    {esferaTab==="finanzas"&&finTab==="deudas"&&(
-                      <div>
-                        {deudas.map(d=>{
-                          const total=d.monto+d.extra,pend=total-d.abonado,pct=Math.round(d.abonado/total*100);
-                          return(
-                            <div key={d.id} style={{background:G.white,border:`1px solid ${G.border}`,borderRadius:12,padding:"12px",marginBottom:8,borderLeft:`3px solid ${G.danger}`}}>
-                              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                                <div><div style={{fontSize:13,fontWeight:600}}>{d.acreedor}</div><div style={{fontSize:10,color:G.muted}}>{d.nota}</div></div>
-                                <div style={{textAlign:"right"}}><div style={{fontSize:14,fontWeight:700,color:G.danger}}>${pend.toLocaleString()}</div><div style={{fontSize:9,color:G.muted}}>de ${total.toLocaleString()}</div></div>
-                              </div>
-                              <div style={{background:"rgba(74,122,80,0.15)",borderRadius:4,height:5,marginBottom:8}}><div style={{width:`${pct}%`,height:"100%",borderRadius:4,background:G.header}}/></div>
-                              <div style={{display:"flex",gap:6}}>
-                                <input type="number" placeholder="Abono $" value={abonoIn[d.id]||""} onChange={ev=>setAbonoIn(a=>({...a,[d.id]:ev.target.value}))}
-                                  style={{flex:1,fontSize:11,padding:"5px 8px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text}}/>
-                                <button onClick={()=>abonar(d.id)} style={{padding:"5px 12px",borderRadius:7,fontSize:11,fontWeight:600,background:G.header,color:"#fff",border:"none",cursor:"pointer"}}>+ Abonar</button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                        <div style={{background:G.claro,border:`1px solid ${G.danger}44`,borderRadius:12,padding:"12px"}}>
-                          <div style={{display:"flex",justifyContent:"space-between"}}><div style={{fontSize:12,color:G.muted}}>Total pendiente</div><div style={{fontSize:20,fontWeight:700,color:G.danger}}>${totalDeudas.toLocaleString()}</div></div>
-                        </div>
-                      </div>
-                    )}
-                    {esferaTab==="finanzas"&&finTab==="gastos"&&(
-                      <div>
-                        {GASTOS_FIJOS.map((g,i)=>(
-                          <div key={i} style={{background:G.white,border:`1px solid ${G.border}`,borderRadius:11,padding:"10px 12px",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center",borderLeft:`3px solid ${g.u?G.danger:G.oscuro}`}}>
-                            <div><div style={{fontSize:12,fontWeight:500}}>{g.label}</div><div style={{fontSize:10,color:G.muted}}>{g.nota}</div></div>
-                            <div style={{fontSize:13,fontWeight:700,color:g.u?G.danger:G.warning}}>${g.monto.toLocaleString()}</div>
-                          </div>
-                        ))}
-                        <div style={{background:G.claro,border:`1px solid ${G.warning}44`,borderRadius:12,padding:"12px"}}>
-                          <div style={{display:"flex",justifyContent:"space-between"}}><div style={{fontSize:12,color:G.muted}}>Total mensual</div><div style={{fontSize:20,fontWeight:700,color:G.warning}}>${totalGastos.toLocaleString()}</div></div>
-                        </div>
-                      </div>
-                    )}
-                    {esferaTab==="relaciones"&&content.relaciones?.checklist&&(
-                      <div style={{background:G.claro,border:`1px solid ${G.border}`,borderRadius:13,padding:"12px",marginBottom:10}}>
-                        <div style={{fontSize:11,color:G.dark,fontWeight:700,marginBottom:8}}>📋 Check diario</div>
-                        {content.relaciones.checklist.map((item,idx)=>{const done=isRl(item.id);return(
-                          <div key={item.id} onClick={()=>togRl(item.id)} style={{display:"flex",alignItems:"center",gap:9,padding:"7px 0",borderBottom:idx<content.relaciones.checklist.length-1?`1px solid ${G.border}`:"none",cursor:"pointer"}}>
-                            <div style={{width:17,height:17,borderRadius:4,border:`2px solid ${done?G.header:"rgba(74,122,80,0.35)"}`,background:done?G.header:"rgba(255,255,255,0.5)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                              {done&&<span style={{fontSize:10,color:"#fff",fontWeight:700}}>✓</span>}
-                            </div>
-                            <div style={{fontSize:12,color:done?G.muted:G.dark,textDecoration:done?"line-through":"none"}}>{item.texto}</div>
-                          </div>
-                        );})}
-                      </div>
-                    )}
-                    {(esferaTab!=="finanzas"||(esferaTab==="finanzas"&&finTab==="items"))&&(
-                      <div>
-                        {items.map(item=>{
-                          const pc=prioColor[item.prioridad]||G.muted;
-                          const ea=editando?.esfera===esferaTab&&editando?.id===item.id;
-                          return(
-                            <div key={item.id} style={{background:G.white,border:`1px solid ${G.border}`,borderRadius:12,padding:"9px 12px",marginBottom:6,borderLeft:`3px solid ${pc}`,opacity:item.estado==="hecho"?.4:1}}>
-                              {ea?(
-                                <div style={{display:"flex",gap:6}}>
-                                  <input value={editTxt} onChange={ev=>setEditTxt(ev.target.value)} onKeyDown={ev=>ev.key==="Enter"&&saveEdit(esferaTab,item.id)}
-                                    style={{flex:1,fontSize:12,padding:"5px 9px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text,outline:"none"}}/>
-                                  <button onClick={()=>saveEdit(esferaTab,item.id)} style={{padding:"5px 10px",borderRadius:7,fontSize:11,background:G.header,color:"#fff",border:"none",cursor:"pointer"}}>✓</button>
-                                  <button onClick={()=>setEditando(null)} style={{padding:"5px 8px",borderRadius:7,fontSize:11,background:"transparent",color:G.muted,border:`1px solid ${G.border}`,cursor:"pointer"}}>✕</button>
-                                </div>
-                              ):(
-                                <div style={{display:"flex",alignItems:"flex-start",gap:8}}>
-                                  <button onClick={()=>togEstado(esferaTab,item.id)} style={{fontSize:14,background:"none",border:"none",cursor:"pointer",color:item.estado==="hecho"?G.header:item.estado==="en progreso"?G.warning:G.muted,flexShrink:0,padding:0,marginTop:2}}>
-                                    {item.estado==="hecho"?"●":item.estado==="en progreso"?"◑":"○"}
-                                  </button>
-                                  <div style={{flex:1,cursor:"pointer"}} onDoubleClick={()=>{setEditando({esfera:esferaTab,id:item.id});setEditTxt(item.texto);}}>
-                                    <div style={{fontSize:12,textDecoration:item.estado==="hecho"?"line-through":"none",color:G.text}}>{item.texto}</div>
-                                    {item.notas&&<div style={{fontSize:10,color:G.muted,marginTop:2}}>{item.notas}</div>}
-                                    <div style={{fontSize:9,color:pc,marginTop:2,fontWeight:600}}>● {item.prioridad}</div>
-                                  </div>
-                                  <button onClick={()=>delItem(esferaTab,item.id)} style={{background:"none",border:"none",color:"rgba(42,90,50,0.2)",cursor:"pointer",fontSize:12}}>✕</button>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                        <div style={{background:G.white,border:`1px dashed ${G.oscuro}`,borderRadius:12,padding:"12px",marginTop:6}}>
-                          <div style={{fontSize:10,color:G.muted,fontWeight:600,textTransform:"uppercase",letterSpacing:".05em",marginBottom:6}}>+ Agregar</div>
-                          <input value={nuevaAct.texto} onChange={ev=>setNuevaAct(a=>({...a,texto:ev.target.value}))} onKeyDown={ev=>ev.key==="Enter"&&addItem(esferaTab)}
-                            placeholder="Objetivo o meta..." style={{width:"100%",boxSizing:"border-box",fontSize:12,padding:"7px 9px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text,marginBottom:5,outline:"none"}}/>
-                          <input value={nuevaAct.notas} onChange={ev=>setNuevaAct(a=>({...a,notas:ev.target.value}))}
-                            placeholder="Nota (opcional)..." style={{width:"100%",boxSizing:"border-box",fontSize:11,padding:"6px 9px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text,marginBottom:5,outline:"none"}}/>
-                          <div style={{display:"flex",gap:6}}>
-                            <select value={nuevaAct.prioridad} onChange={ev=>setNuevaAct(a=>({...a,prioridad:ev.target.value}))}
-                              style={{flex:1,fontSize:11,padding:"5px 7px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text}}>
-                              {PRIORIDADES.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
-                            </select>
-                            <button onClick={()=>addItem(esferaTab)} style={{padding:"6px 14px",borderRadius:7,fontSize:12,fontWeight:600,background:G.header,color:"#fff",border:"none",cursor:"pointer"}}>+ Agregar</button>
-                          </div>
-                        </div>
-                        <div style={{fontSize:9,color:G.muted,marginTop:4,textAlign:"center"}}>Doble clic para editar</div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* HISTORIAL */}
-          {tab==="historial"&&(
-            <div>
-              {getSemanas().map(sem=>{
-                const esAct=sem.dias.some(d=>d.esHoy);
-                return(
-                  <div key={sem.sk} style={{background:G.white,border:`1px solid ${esAct?G.header+"88":G.border}`,borderRadius:14,padding:"14px",marginBottom:12}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                      <div>
-                        <div style={{fontSize:11,fontWeight:700,color:esAct?G.dark:G.muted}}>{esAct?"📅 Semana actual":"📅 "+sem.label}</div>
-                        {!esAct&&<div style={{fontSize:9,color:G.muted}}>{sem.label}</div>}
-                      </div>
-                      <div style={{textAlign:"center"}}><div style={{fontSize:15,fontWeight:700,color:G.header}}>{sem.ckAvg}%</div><div style={{fontSize:8,color:G.muted}}>checklist</div></div>
-                    </div>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:10}}>
-                      {DIAS_FULL.map((dn,di)=>{
-                        const dd=sem.dias.find(d=>{const dw=new Date(d.fecha+"T12:00:00").getDay();return(dw===0?6:dw-1)===di;});
-                        return(
-                          <div key={di} style={{textAlign:"center"}}>
-                            <div style={{fontSize:8,color:G.muted,marginBottom:3}}>{dn.slice(0,3)}</div>
-                            {dd?(
-                              <div style={{width:28,height:28,borderRadius:"50%",margin:"0 auto",background:`conic-gradient(${G.header} ${dd.cp*3.6}deg, rgba(74,122,80,0.15) 0deg)`,display:"flex",alignItems:"center",justifyContent:"center",border:dd.esHoy?`2px solid ${G.dark}`:"2px solid transparent"}}>
-                                <div style={{width:18,height:18,borderRadius:"50%",background:G.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                                  <span style={{fontSize:7,fontWeight:700,color:dd.cp>=80?G.dark:dd.cp>=50?G.warning:G.danger}}>{dd.cp}%</span>
-                                </div>
-                              </div>
-                            ):(
-                              <div style={{width:28,height:28,borderRadius:"50%",margin:"0 auto",background:"rgba(74,122,80,0.08)",border:`1px dashed ${G.border}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                                <span style={{fontSize:8,color:G.border}}>—</span>
-                              </div>
-                            )}
-                            {dd?.esHoy&&<div style={{fontSize:7,color:G.dark,fontWeight:700,marginTop:1}}>hoy</div>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div style={{padding:"6px 10px",borderRadius:8,background:G.claro,border:`1px solid ${G.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span style={{fontSize:10,color:G.muted}}>Calificación</span>
-                      <span style={{fontSize:11,fontWeight:700,color:sem.ckAvg>=80?G.dark:sem.ckAvg>=50?G.warning:G.danger}}>{sem.ckAvg>=80?"🟢 Excelente":sem.ckAvg>=50?"🟡 Bien":"🔴 Mejorar"} — {sem.ckAvg}%</span>
-                    </div>
-                  </div>
-                );
-              })}
-              {getSemanas().length===0&&<div style={{textAlign:"center",color:G.muted,padding:"2rem",fontSize:12}}>Empieza a marcar tu checklist hoy.</div>}
-            </div>
-          )}
-
-          {/* CHAT IA */}
-          {tab==="chat"&&(
-            <div>
-              <div ref={chatRef} style={{minHeight:240,maxHeight:360,overflowY:"auto",display:"flex",flexDirection:"column",gap:8,marginBottom:10}}>
-                {chat.length===0&&(
-                  <div style={{background:G.white,border:`1px solid ${G.border}`,borderRadius:14,padding:"20px",textAlign:"center",marginTop:16}}>
-                    <div style={{fontSize:24,marginBottom:6}}>🧠</div>
-                    <div style={{fontSize:13,color:G.dark,fontWeight:600,marginBottom:3}}>Hola Adán</div>
-                    <div style={{fontSize:11,color:G.muted}}>Tu cerebro conoce tu estado, proyectos y deudas.</div>
-                  </div>
-                )}
-                {chat.map((m,i)=>(
-                  <div key={i} style={{alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"82%",padding:"9px 13px",borderRadius:12,
-                    background:m.role==="user"?G.header:G.white,color:m.role==="user"?"#fff":G.text,fontSize:12,lineHeight:1.6,
-                    border:m.role==="user"?"none":`1px solid ${G.border}`}}>{m.content}</div>
-                ))}
-                {cargando&&<div style={{alignSelf:"flex-start",padding:"9px 13px",borderRadius:12,background:G.white,border:`1px solid ${G.border}`,fontSize:12,color:G.muted}}>Pensando...</div>}
-              </div>
-              <div style={{display:"flex",gap:7}}>
-                <input value={inp} onChange={ev=>setInp(ev.target.value)} onKeyDown={ev=>ev.key==="Enter"&&sendChat()}
-                  placeholder="¿Qué quieres reflexionar?" disabled={cargando}
-                  style={{flex:1,fontSize:12,padding:"9px 12px",borderRadius:20,border:`1px solid ${G.border}`,background:G.white,color:G.text,outline:"none"}}/>
-                <button onClick={sendChat} disabled={cargando||!inp.trim()} style={{padding:"9px 16px",borderRadius:20,fontSize:12,fontWeight:700,background:G.header,color:"#fff",border:"none",cursor:"pointer",opacity:cargando?.6:1}}>Enviar</button>
-              </div>
-            </div>
-          )}
-        </div>
-      );
+      if(STATE.finTab==="gastos"){
+        GASTOS.forEach(g=>{
+          html+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-left:3px solid ${g.u?"#c0392b":"#7aaa7e"}">
+            <div><div style="font-size:12px;font-weight:500">${g.l}</div></div>
+            <div style="font-size:13px;font-weight:700;color:${g.u?"#c0392b":"#b07800"}">$${g.m.toLocaleString()}</div>
+          </div>`;
+        });
+        const totalG=GASTOS.reduce((s,g)=>s+g.m,0);
+        html+=`<div class="card" style="background:#ccdece"><div style="display:flex;justify-content:space-between"><span style="color:#5a7a5e">Total mensual</span><span style="font-size:20px;font-weight:700;color:#b07800">$${totalG.toLocaleString()}</span></div></div>`;
+      }
     }
 
-    const root=ReactDOM.createRoot(document.getElementById("root"));
-    root.render(React.createElement(App));
-  </script>
+    // Check relaciones
+    if(STATE.esfera==="relaciones"){
+      html+=`<div class="card" style="background:#ccdece;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#2d5a32;margin-bottom:8px">📋 Check diario</div>`;
+      RCHECK_INIT.forEach(item=>{
+        const done=isRl(item.id);
+        html+=`<div class="check-item" onclick="togRl('${item.id}')">
+          <div class="check-box${done?" done":""}">${done?"<span style='font-size:10px;color:#fff;font-weight:700'>✓</span>":""}</div>
+          <div class="check-text${done?" done":""}">${item.t}</div>
+        </div>`;
+      });
+      html+="</div>";
+    }
+
+    // Items esfera
+    if(STATE.esfera!=="finanzas"||(STATE.esfera==="finanzas"&&STATE.finTab==="items")){
+      const items=STATE.items[STATE.esfera]||[];
+      items.forEach(item=>{
+        const estados={pendiente:"○","en progreso":"◑",hecho:"●"};
+        const eColor={pendiente:"#5a7a5e","en progreso":"#b07800",hecho:"#4a7a50"};
+        html+=`<div class="card" style="padding:10px 12px;border-left:3px solid ${PC[item.p]||"#5a7a5e"};opacity:${item.e==="hecho"?.4:1}">
+          <div class="item-row" style="padding:0;border:none">
+            <button onclick="togEstado('${STATE.esfera}',${item.id})" style="background:none;border:none;cursor:pointer;font-size:15px;color:${eColor[item.e]};flex-shrink:0">${estados[item.e]}</button>
+            <div style="flex:1">
+              <div style="font-size:12px;text-decoration:${item.e==="hecho"?"line-through":"none"}">${item.t}</div>
+              <div style="font-size:9px;color:${PC[item.p]};margin-top:2px;font-weight:600">● ${item.p}</div>
+            </div>
+            <button onclick="delItem('${STATE.esfera}',${item.id})" style="background:none;border:none;cursor:pointer;color:rgba(42,90,50,.25);font-size:12px">✕</button>
+          </div>
+        </div>`;
+      });
+      html+=`<div class="card" style="border-style:dashed;border-color:#7aaa7e">
+        <input id="new-item-txt" placeholder="Objetivo o meta..." style="margin-bottom:6px"/>
+        <div style="display:flex;gap:6px">
+          <select id="new-item-prio" style="flex:1"><option value="urgente">Urgente</option><option value="importante" selected>Importante</option><option value="meta">Meta</option></select>
+          <button class="btn btn-primary" onclick="addItem('${STATE.esfera}')">+ Agregar</button>
+        </div>
+      </div>
+      <div style="font-size:9px;color:#5a7a5e;text-align:center;margin-top:4px">Toca ○ para cambiar estado</div>`;
+    }
+  }
+
+  // ── HISTORIAL ──
+  if(STATE.tab==="historial"){
+    const dias=Object.keys(STATE.historial).sort().slice(-14);
+    if(dias.length===0){
+      html+=`<div class="card" style="text-align:center;color:#5a7a5e;padding:2rem">Empieza a marcar tu checklist hoy y aquí verás tu progreso.</div>`;
+    } else {
+      // Agrupar por semana
+      const semMap={};
+      dias.forEach(fecha=>{
+        const sk=getSemanaKey(fecha);
+        if(!semMap[sk]) semMap[sk]={dias:[]};
+        const reg=STATE.historial[fecha]||{};
+        const cp=reg.ckTotal?Math.round(reg.ckDone/reg.ckTotal*100):0;
+        semMap[sk].dias.push({fecha,cp,esHoy:fecha===hoy});
+      });
+      Object.entries(semMap).sort(([a],[b])=>b.localeCompare(a)).forEach(([sk,sem])=>{
+        const avg=sem.dias.length?Math.round(sem.dias.reduce((s,d)=>s+d.cp,0)/sem.dias.length):0;
+        const esAct=sem.dias.some(d=>d.esHoy);
+        const l=new Date(sk+"T12:00:00"),do2=new Date(l);do2.setDate(l.getDate()+6);
+        const lbl=`${l.toLocaleDateString("es-MX",{day:"2-digit",month:"short"})} — ${do2.toLocaleDateString("es-MX",{day:"2-digit",month:"short"})}`;
+        html+=`<div class="semana-card" style="border-color:${esAct?"#4a7a5088":"rgba(74,122,80,0.25)"}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:${esAct?"#2d5a32":"#5a7a5e"}">${esAct?"📅 Semana actual":"📅 "+lbl}</div>
+              ${!esAct?`<div style="font-size:9px;color:#5a7a5e">${lbl}</div>`:""}
+            </div>
+            <div style="text-align:center"><div style="font-size:15px;font-weight:700;color:#4a7a50">${avg}%</div><div style="font-size:8px;color:#5a7a5e">checklist</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px">
+            ${["L","M","X","J","V","S","D"].map((dn,di)=>{
+              const dd=sem.dias.find(d=>{const dw=new Date(d.fecha+"T12:00:00").getDay();return(dw===0?6:dw-1)===di});
+              if(dd){
+                const color=dd.cp>=80?"#2d5a32":dd.cp>=50?"#b07800":"#c0392b";
+                return `<div style="text-align:center">
+                  <div style="font-size:8px;color:#5a7a5e;margin-bottom:2px">${dn}</div>
+                  <div class="dia-circle" style="background:${dd.esHoy?"#4a7a50":"#ccdece"};color:${dd.esHoy?"#fff":color};border:${dd.esHoy?"2px solid #2d5a32":"1px solid rgba(74,122,80,0.3)"}">${dd.cp}%</div>
+                </div>`;
+              }
+              return `<div style="text-align:center"><div style="font-size:8px;color:#5a7a5e;margin-bottom:2px">${dn}</div><div class="dia-circle" style="background:rgba(74,122,80,0.08);border:1px dashed rgba(74,122,80,0.2);color:rgba(74,122,80,0.3)">—</div></div>`;
+            }).join("")}
+          </div>
+          <div style="padding:6px 10px;border-radius:8px;background:#ccdece;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;color:#5a7a5e">Calificación</span>
+            <span style="font-size:11px;font-weight:700;color:${avg>=80?"#2d5a32":avg>=50?"#b07800":"#c0392b"}">${avg>=80?"🟢 Excelente":avg>=50?"🟡 Bien":"🔴 Mejorar"} — ${avg}%</span>
+          </div>
+        </div>`;
+      });
+    }
+  }
+
+  // ── CHAT IA ──
+  if(STATE.tab==="chat"){
+    html+=`<div id="chat-box" style="min-height:240px;max-height:360px;overflow-y:auto;display:flex;flex-direction:column;margin-bottom:10px">`;
+    if(STATE.chat.length===0){
+      html+=`<div class="card" style="text-align:center;margin-top:16px"><div style="font-size:24px;margin-bottom:6px">🧠</div><div style="font-size:13px;font-weight:600;color:#2d5a32;margin-bottom:3px">Hola Adán</div><div style="font-size:11px;color:#5a7a5e">Tu cerebro conoce tu estado, proyectos y deudas.</div></div>`;
+    }
+    STATE.chat.forEach(m=>{
+      html+=`<div class="chat-msg ${m.r==="user"?"chat-user":"chat-bot"}">${m.c}</div>`;
+    });
+    html+=`</div>
+    <div style="display:flex;gap:7px">
+      <input id="chat-inp" placeholder="¿Qué quieres reflexionar?" onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;border-radius:20px"/>
+      <button class="btn btn-primary" style="border-radius:20px;padding:9px 14px" onclick="sendChat()">Enviar</button>
+    </div>`;
+  }
+
+  app.innerHTML=html;
+  // Scroll al fondo del chat
+  const cb=document.getElementById("chat-box");
+  if(cb) cb.scrollTop=cb.scrollHeight;
+}
+
+// ── ACCIONES ──────────────────────────────────────────────────────────────────
+function setTab(t){STATE.tab=t;render()}
+function setEsfera(e){STATE.esfera=e;render()}
+function setFinTab(t){STATE.finTab=t;render()}
+function toggleSec(id){STATE.secOpen[id]=STATE.secOpen[id]===false?true:false;render()}
+function setNivel(esfera,v){STATE.niveles[esfera]=+v;saveMain();render()}
+
+function togCk(s,i){
+  const k=ckKey(s,i);STATE.checks[k]=!STATE.checks[k];
+  saveCk();render();
+}
+function togRl(id){
+  const k=`${hoy}-rel-${id}`;STATE.relChecks[k]=!STATE.relChecks[k];
+  saveRl();render();
+}
+function addCkItem(sid){
+  const inp=document.getElementById("add-"+sid);
+  if(!inp||!inp.value.trim()) return;
+  const sec=SECCIONES.find(s=>s.id===sid);
+  if(sec) sec.items.push({id:"c"+Date.now(),t:inp.value.trim(),h:""});
+  render();
+}
+function togEstado(esfera,id){
+  const items=STATE.items[esfera]||[];
+  const item=items.find(x=>x.id===id);
+  if(!item) return;
+  item.e=item.e==="hecho"?"pendiente":item.e==="pendiente"?"en progreso":"hecho";
+  saveMain();render();
+}
+function delItem(esfera,id){
+  STATE.items[esfera]=(STATE.items[esfera]||[]).filter(x=>x.id!==id);
+  saveMain();render();
+}
+function addItem(esfera){
+  const txt=document.getElementById("new-item-txt");
+  const prio=document.getElementById("new-item-prio");
+  if(!txt||!txt.value.trim()) return;
+  if(!STATE.items[esfera]) STATE.items[esfera]=[];
+  STATE.items[esfera].push({id:Date.now(),t:txt.value.trim(),p:prio?prio.value:"importante",e:"pendiente"});
+  saveMain();render();
+}
+function abonar(id){
+  const inp=document.getElementById("ab-"+id);
+  if(!inp) return;
+  const m=parseFloat(inp.value);
+  if(!m||m<=0) return;
+  const d=STATE.deudas.find(x=>x.id===id);
+  if(d) d.ab=Math.min(d.ab+m,d.m+d.e);
+  saveMain();render();
+}
+
+async function sendChat(){
+  const inp=document.getElementById("chat-inp");
+  if(!inp||!inp.value.trim()) return;
+  const msg=inp.value.trim();inp.value="";
+  STATE.chat.push({r:"user",c:msg});
+  render();
+  const rs=ESFERAS.map(e=>`${e.label}: ${STATE.niveles[e.id]||5}/10`).join(", ");
+  const dr=STATE.deudas.map(d=>`${d.a}: $${(d.m+d.e-d.ab).toLocaleString()}`).join(", ");
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:800,
+        system:`Eres el "Nuevo Cerebro" de Adán Federico, 49 años, vendedor inmobiliario México. Directo, cálido. Estado: ${rs}. Deudas: ${dr}. Máx 3 párrafos.`,
+        messages:STATE.chat.map(m=>({role:m.r==="user"?"user":"assistant",content:m.c}))})
+    });
+    const data=await res.json();
+    const reply=data.content?.map(b=>b.text||"").join("")||"Sin respuesta.";
+    STATE.chat.push({r:"bot",c:reply});
+  }catch(e){
+    STATE.chat.push({r:"bot",c:"Error de conexión. Intenta de nuevo."});
+  }
+  saveMain();render();
+}
+
+// Iniciar
+render();
+</script>
 </body>
 </html>
