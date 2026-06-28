@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -541,7 +542,7 @@
                             placeholder="Objetivo o meta..." style={{width:"100%",boxSizing:"border-box",fontSize:12,padding:"7px 9px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text,marginBottom:5,outline:"none"}}/>
                           <input value={nuevaAct.notas} onChange={ev=>setNuevaAct(a=>({...a,notas:ev.target.value}))}
                             placeholder="Nota (opcional)..." style={{width:"100%",boxSizing:"border-box",fontSize:11,padding:"6px 9px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text,marginBottom:5,outline:"none"}}/>
-                          <div style={{display:"flex",gap:6"}}>
+                          <div style={{display:"flex",gap:6}}>
                             <select value={nuevaAct.prioridad} onChange={ev=>setNuevaAct(a=>({...a,prioridad:ev.target.value}))}
                               style={{flex:1,fontSize:11,padding:"5px 7px",borderRadius:7,border:`1px solid ${G.border}`,background:G.white,color:G.text}}>
                               {PRIORIDADES.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}
